@@ -1,6 +1,6 @@
-title: Cross-Platform Origin of Content (XPOC) resources
-description: Cross-Platform Origin of Content (XPOC) resources
+title: XPOC Framework
+description: Resources for the Cross-Platform Origin of Content (XPOC) framework
 #theme: jekyll-theme-minimal
-remote_theme: pages-themes/cayman@v0.2.0
+remote_theme: pages-themes/midnight@v0.2.0
 plugins:
 - jekyll-remote-theme
