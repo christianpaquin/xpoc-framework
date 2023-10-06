@@ -9,70 +9,47 @@
 </head>
 
 <body>
-    <h1>XPOC Manifest Creator</h1>
-    <p>
-        This page allows the creation of a XPOC manifest by adding the owner's accounts on popular platforms. Simply
-        enter the accounts you own and click the "Create manifest" button.
-    </p>
-    <p>
-        To add additional platforms or specific content items, use the <a href="xpoc-editor.html">XPOC editor</a> instead.
-    </p>
+    <div class="xpoc-ez-creator">
+        <h1>XPOC Manifest Creator</h1>
+        <p>
+            This page allows the creation of a XPOC manifest by adding your accounts on popular platforms. Simply
+            enter your plaform specific account names (social handles, user IDs, etc.) and click the "Create" button.
+            You can then "Copy" or "Save" the manifest file.
+        </p>
+        <p>
+            To add additional platforms or specific content items, use the <a href="xpoc-editor.html">XPOC editor</a> instead.
+        </p>
 
-    <div class="error" id="errorMsg"></div>
+        <div class="error" id="errorMsg"></div>
 
-    <div id="manifestData">
-        <h2>Manifest Info</h2>
-        <table id="manifestInfoTable">
-            <tbody>
-                <tr>
-                    <td><label for="manifestName">Name *</label><span class="info-tooltip">i<span class="tooltip-text">Name of the XPOC manifest owner</span></span></td>
-                    <td><input type="text" id="manifestName" onchange="validateAndUpdateName(this.value, this)"></td>
-                </tr>
-                <tr>
-                    <td><label for="manifestBaseUrl">Base URL *</label><span class="info-tooltip">i<span class="tooltip-text">Base URL of the XPOC manifest location (e.g., "example.com" or "example.com/path")</span></span></td>
-                    <td><input type="text" id="manifestBaseUrl" onchange="validateAndUpdateURL(this.value, this)"></td>
-                </tr>
-            </tbody>
-        </table>
-        <h2>Accounts</h2>
-        <table id="accountsTable">
-            <tbody>
-                <thead>
+        <div id="manifestData">
+            <h2>Manifest Info</h2>
+            <table id="manifestInfoTable">
+                <tbody>
                     <tr>
-                        <th>Platform</th>
-                        <th>Account name</th>
+                        <td><label for="manifestName">Name *</label><span class="info-tooltip">i<span class="tooltip-text">Name of the XPOC manifest owner</span></span></td>
+                        <td><input type="text" id="manifestName" onchange="validateAndUpdateName(this.value, this)"></td>
                     </tr>
-                </thead>
-                <tr>
-                    <td>Facebook</td>
-                    <td><input type="text" id="facebookAccount" onchange="validateAndUpdateAccount(this.value, this)"></td>
-                </tr>
-                <tr>
-                    <td>X (formerly Twitter)</td>
-                    <td><input type="text" id="xAccount" onchange="validateAndUpdateAccount(this.value, this)"></td>
-                </tr>
-                <tr>
-                    <td>Instagram</td>
-                    <td><input type="text" id="instagramAccount" onchange="validateAndUpdateAccount(this.value, this)"></td>
-                </tr>
-                <tr>
-                    <td>YouTube</td>
-                    <td><input type="text" id="youtubeAccount" onchange="validateAndUpdateAccount(this.value, this)"></td>
-                </tr>
-                <tr>
-                    <td>TikTok</td>
-                    <td><input type="text" id="tiktokAccount" onchange="validateAndUpdateAccount(this.value, this)"></td>
-                </tr>
-                <tr>
-                    <td>LinkedIn</td>
-                    <td><input type="text" id="linkedinAccount" onchange="validateAndUpdateAccount(this.value, this)"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                    <tr>
+                        <td><label for="manifestBaseUrl">Base URL *</label><span class="info-tooltip">i<span class="tooltip-text">Base URL of the XPOC manifest location (e.g., "example.com" or "example.com/path")</span></span></td>
+                        <td><input type="text" id="manifestBaseUrl" onchange="validateAndUpdateURL(this.value, this)"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Accounts</h2>
+            Show all supported platforms <label class="switch"><input type="checkbox" id="toggleSwitch"><span class="slider round"></span></label>
+            <table id="accountsTable">
+                <!-- Dynamic content will be inserted here -->
+            </table>
 
-    <br><br>
-    <button id="saveButton" onclick="saveToFile()">Create manifest</button>
+            <br><br>
+            <button id="createButton" onclick="createManifest()">Create</button>
+            <button id="saveButton" onclick="saveManifest()" disabled>Save</button>
+            <button id="copyButton" onclick="copyToClipboard()" disabled>Copy</button>
+            <br><br>
+            <textarea id="manifestTextArea" rows="20" cols="100" readonly style="display: none;"></textarea>
+        </div>
+    </div>
 
     <script src="xpoc-common.js"></script>
     <script>
@@ -86,62 +63,108 @@
             content: []
         };
 
+        let accountReplaceString = "^ACCOUNT^";
+
+        let platforms = [
+            {
+                show: true,
+                displayName: "Facebook",
+                name: "Facebook",
+                url: `https://www.facebook.com/${accountReplaceString}`,
+            },
+            {
+                show: true,
+                displayName: "X (Twitter)",
+                name: "X",
+                url: `https://twitter.com/${accountReplaceString}`,
+            },
+            {
+                show: true,
+                displayName: "Instagram",
+                name: "Instagram",
+                url: `https://www.instagram.com/${accountReplaceString}/`,
+            },
+            {
+                show: true,
+                displayName: "YouTube",
+                name: "YouTube",
+                url: `https://www.youtube.com/@${accountReplaceString}/about`,
+            },
+            {
+                show: true,
+                displayName: "TikTok",
+                name: "TikTok",
+                url: `https://www.tiktok.com/@${accountReplaceString}`,
+            },
+            {
+                show: true,
+                displayName: "LinkedIn",
+                name: "LinkedIn",
+                url: `https://www.linkedin.com/in/${accountReplaceString}`,
+            },
+            {
+                show: false,
+                displayName: "Medium",
+                name: "Medium",
+                url: `https://${accountReplaceString}.medium.com`,
+            },
+            {
+                show: false,
+                displayName: "Threads",
+                name: "Threads",
+                url: `https://www.threads.net/@${accountReplaceString}`,
+            },
+            {
+                show: false,
+                displayName: "Google Scholar",
+                name: "GoogleScholar",
+                url: `https://scholar.google.com/citations?user=${accountReplaceString}`,
+            }
+        ]
+
+        let showAllPlatforms = false; // modified by toggle switch
+        document.getElementById('toggleSwitch').addEventListener('change', function() {
+            showAllPlatforms = this.checked;
+            console.log('Show All Platforms:', showAllPlatforms);
+            updateAccountsTable();
+        });
+
+        function updateAccountsTable() {
+            let html = `
+                <tbody>
+            `;
+
+            platforms.forEach((platform) => {
+                if (platform.show || showAllPlatforms) {
+                    html += `
+                        <tr>
+                            <td>${platform.displayName}</td>
+                            <td><input type="text" id="${platform.name}Account" onchange="validateAndUpdateAccount(this.value, this)"></td>
+                        </tr>
+                    `;
+                }
+            });
+
+            html += `</tbody>`;
+            document.getElementById('accountsTable').innerHTML = html;
+        }
+
+
         function setAccounts() {
             let count = 0;
-            if (facebookAccount.value) {
-                let account = facebookAccount.value;
-                manifest.accounts.push({
-                    "account": account,
-                    "platform": "Facebook",
-                    "url": `https://www.facebook.com/${account}`
-		        })
-                count++;
-            }
-            if (xAccount.value) {
-                let account = xAccount.value;
-                manifest.accounts.push({
-                    "account": account,
-                    "platform": "X",
-                    "url": `https://twitter.com/${account}`
-                })
-                count++;
-            }
-            if (instagramAccount.value) {
-                let account = instagramAccount.value;
-                manifest.accounts.push({
-                    "account": account,
-                    "platform": "Instagram",
-                    "url": `https://www.instagram.com/${account}/`
-                })
-                count++;
-            }
-            if (youtubeAccount.value) {
-                let account = youtubeAccount.value;
-                manifest.accounts.push({
-                    "account": account,
-                    "platform": "YouTube",
-                    "url": `https://www.youtube.com/@${account}/about`
-                })
-                count++;
-            }
-            if (tiktokAccount.value) {
-                let account = tiktokAccount.value;
-                manifest.accounts.push({
-                    "account": account,
-                    "platform": "TikTok",
-                    "url": `https://www.tiktok.com/@${account}`
-                })
-                count++;
-            }
-            if (linkedinAccount.value) {
-                let account = linkedinAccount.value;
-                manifest.accounts.push({
-                    "account": account,
-                    "platform": "LinkedIn",
-                    "url": `https://www.linkedin.com/in/${account}`
-                })
-                count++;
-            }
+            platforms.forEach((platform) => {
+                if (platform.show || showAllPlatforms) {
+                    let account = document.getElementById(`${platform.name}Account`).value;
+                    if (account) {
+                        manifest.accounts.push({
+                            "account": account,
+                            "platform": platform.name,
+                            "url": platform.url.replace(accountReplaceString, account)
+                        })
+                        count++;
+                    }
+                }
+            });
             return count;
         }
 
@@ -184,7 +207,7 @@
             inputElement.value = inputValue;
         }
 
-        function saveToFile() {
+        function createManifest() {
             if (!manifest.name) {
                 showError("Please enter a name for the manifest owner.");
                 return;
@@ -198,7 +221,20 @@
                 showError("Please enter at least one account.");
                 return;
             }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifest, null, 4));
+
+            // Populate the textarea with the generated manifest and make it visible
+            const manifestTextArea = document.getElementById('manifestTextArea');
+            manifestTextArea.value = JSON.stringify(manifest, null, 2);
+            manifestTextArea.style.display = 'block';
+
+            // Enable the Save and Copy buttons
+            document.getElementById('saveButton').disabled = false;
+            document.getElementById('copyButton').disabled = false;
+        }
+
+        function saveManifest() {
+            const manifestJson = document.getElementById('manifestTextArea').value;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(manifestJson);
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
             downloadAnchorNode.setAttribute("download", "xpoc-manifest.json");
@@ -206,6 +242,15 @@
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('manifestTextArea');
+            textarea.select();
+            document.execCommand('copy');
+        }
+
+        // update the accounts table on page load
+        updateAccountsTable();
     </script>
 </body>
 
