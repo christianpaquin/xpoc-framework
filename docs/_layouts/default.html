@@ -34,7 +34,7 @@
 
       </section>
     </div>
-    <footer style="width: 80%;">
+    <footer style="width: 80%; display: flex; justify-content: space-between; align-items: center;">
         <div class="footer-links">
             <a href="{{ site.github.repository_url }}/blob/main/SUPPORT.md">Contact Us</a> |
             <a href="https://privacy.microsoft.com/en-us/privacystatement/">Privacy & Cookies</a> |
@@ -43,8 +43,10 @@
             <a href="{{ site.github.repository_url }}/blob/main/README.md#trademarks">Trademarks</a> |
             <a href="{{ site.github.repository_url }}/blob/main/LICENSE">License</a>
         </div>
-        © 2023 Microsoft
-        <a href="https://microsoft.com"><img src="{{ '/assets/images/microsoft-logo.svg' | relative_url }}" alt="Microsoft" style="height: 1.5em;"></a>
+        <div class="copyright-logo">
+          © 2023 Microsoft
+          <a href="https://microsoft.com"><img src="{{ '/assets/images/microsoft-logo.svg' | relative_url }}" alt="Microsoft" style="height: 1.5em;"></a>
+        </div>
       </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
   </body>
