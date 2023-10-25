@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Cross-Platform Origin Content Extension",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "description": "Validates XPOC-protected content",
     "permissions": [
         "activeTab",
@@ -30,7 +30,10 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "icons/xpoc_logo.svg"
+                "icons/xpoc_logo.svg",
+                "icons/checkmark.svg",
+                "icons/invalid.svg",
+                "icons/warning.svg"
             ],
             "matches": [
                 "<all_urls>"

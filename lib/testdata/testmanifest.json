@@ -1,7 +1,8 @@
 {
     "name": "A test name",
     "baseurl": "https://example.com",
-	"version": "0.2",
+	"version": "0.3",
+	"updated": "2023-10-23T15:00:00Z",
 	"accounts": [
 		{
 			"account": "a_X_test_account",
@@ -57,6 +58,19 @@
 			"account": "a_gh_test_account",
 			"platform": "GitHub",
 			"url": "https://github.com/a_gh_test_account"
+		},
+		{
+			"account": "a_tg_test_account",
+			"platform": "Telegram",
+			"url": "https://t.me/a_tg_test_account"
+		},
+		{
+			"account": "a_ln_test_account",
+			"platform": "LINE"
+		},
+		{
+			"account": "a_sc_test_account",
+			"platform": "Snapchat"
 		},
 		{
 			"account": "a_us_test_account",

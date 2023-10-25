@@ -7,9 +7,12 @@ List of platforms:
 -   [GitHub](#github)
 -   [Google Scholar](#google-scholar)
 -   [Instagram](#instagram)
+-   [LINE](#line)
 -   [LinkedIn](#linkedin)
 -   [Medium](#medium)
 -   [Rumble](#rumble)
+-   [Snapchat](#snapchat)
+-   [Telegram](#telegram)
 -   [Threads](#threads)
 -   [TikTok](#tiktok)
 -   [X (Twitter)](#x-twitter)
@@ -91,6 +94,21 @@ It is RECOMMENDED to only list Instagram accounts and not individual pieces of c
 -    On the account page: in the account page's Bio field.
 -    For a post: in a post's caption field.
 
+## LINE
+
+LINE only offers in-app access, therefore XPOC manifests cannot link to account and content URLs. 
+
+### Manifest content
+
+-   `accounts` properties:
+    -   `platform`: "LINE"
+    -   `account`: the owner's LINE ID (without the `@`)
+    -   `url`: n/a (leave empty)
+
+### XPOC URI placement
+
+Not applicable.
+
 ## LinkedIn
 
 ### Manifest content
@@ -151,6 +169,38 @@ Medium accounts and specific stories can be added to a XPOC manifest.
 
 - For individuals: in the user's channel Description field (per channel). This will appear on the About page (`<url>/about/`) of the account.
 - For a post: in a video's tag field.
+
+## Snapchat
+
+Snapchat only offers in-app access, therefore XPOC manifests cannot link to account and content URLs. 
+
+### Manifest content
+
+-   `accounts` properties:
+    -   `platform`: "Snapchat"
+    -   `account`: the owner's username
+    -   `url`: n/a (leave empty)
+
+### XPOC URI placement
+
+Not applicable.
+
+## Telegram
+
+Public Telegram accounts and channels can be added to a XPOC manifest; both are treated as XPOC "accounts".
+
+### Manifest content
+
+-   properties shared by `accounts` and `content`:
+    -   `platform`: "Telegram"
+    -   `account`: the owner's account or channel name `<accountname>`
+    -   `url`: the canonical `https://t.me/<accountname>` url is preferred; avoid using the URLs with opaque invitation parameters 
+
+### XPOC URI placement
+
+- For accounts: in the bio field
+- For channels: in the description field.
+
 
 ## Threads
 
