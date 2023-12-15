@@ -4,7 +4,8 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { Manifest, XPOCManifest, AccountMatchValues, ContentMatchValues } from './manifest';
+import { Manifest, XPOCManifest, AccountMatchValues, ContentMatchValues } from '../src/manifest';
+import { type FetchError } from '../src/fetch';
 
 describe('manifest file operations', () => {
     let manifest: Manifest;
@@ -60,7 +61,7 @@ describe('manifest file operations', () => {
 describe('manifest file operations', () => {
     // Path to our temporary directory and file
     const tmpDir = join(tmpdir(), 'xpoc_tmp');
-    const tmpFilePath = join(tmpDir, 'testmanifest.json');
+    const tmpFilePath = join(tmpDir, 'xpoc-manifest.json');
 
     // Before all tests, ensure the directory exists
     beforeAll(async () => {
@@ -72,15 +73,15 @@ describe('manifest file operations', () => {
         }
     });
 
-    let testManifest = Manifest.loadFromFile('./testdata/testmanifest.json');
+    let testManifest = Manifest.loadFromFile('./testdata/xpoc-manifest.json');
     test('load manifest from file', () => {
         // sanity check
         expect(testManifest).toBeDefined();
         expect(testManifest?.manifest.name).toBe('A test name');
         expect(testManifest?.manifest.version).toBe(Manifest.LatestVersion);
         expect(testManifest?.manifest.updated).toBe("2023-10-23T15:00:00Z");
-        expect(testManifest?.manifest.accounts?.length).toBe(15);
-        expect(testManifest?.manifest.content?.length).toBe(10);
+        expect(testManifest?.manifest.accounts?.length).toBe(16);
+        expect(testManifest?.manifest.content?.length).toBe(11);
     });
 
     (testManifest ? test : test.skip)('match accounts', () => {
@@ -153,7 +154,7 @@ describe('manifest file operations', () => {
 describe('manifest validation', () => {
     // Path to our temporary directory and file
     const tmpDir = join(tmpdir(), 'xpoc_tmp');
-    const tmpFilePath = join(tmpDir, 'testmanifest.json');
+    const tmpFilePath = join(tmpDir, 'xpoc-manifest.json');
 
     //
     // TODO: create additional test manifests with invalid values
@@ -169,7 +170,7 @@ describe('manifest validation', () => {
         }
     });
 
-    let testManifest = Manifest.loadFromFile('./testdata/testmanifest.json');
+    let testManifest = Manifest.loadFromFile('./testdata/xpoc-manifest.json');
 
     test('validate schema: valid', () => {
         const validation = Manifest.validate(testManifest.manifest);
@@ -203,4 +204,40 @@ describe('manifest validation', () => {
             // ignore errors
         }
     });
+});
+
+describe('manifest download', () => {
+
+    // the test manifest at ./testData/xpoc-manifest.json, but in the repo
+    const manifestUrl = 'https://raw.githubusercontent.com/microsoft/xpoc-framework/main/lib/testdata';
+
+    test('download: valid manifest', async () => {
+        const manifest = await Manifest.download(manifestUrl)
+        expect(manifest.valid).toBe(true);
+    });
+
+    test('download: valid manifest (trailing slash)', async () => {
+        const manifest = await Manifest.download(manifestUrl + '/')
+        expect(manifest.valid).toBe(true);
+    });
+
+    test('download: valid manifest (full path)', async () => {
+        const manifest = await Manifest.download(manifestUrl + '/xpoc-manifest.json')
+        expect(manifest.valid).toBe(true);
+    });
+
+    test('download: non-existent url', async () => {
+        const manifest = await Manifest.download(manifestUrl + 'x').catch((err) => err);
+        const error = manifest as FetchError;
+        expect(error).toBeInstanceOf(Error);
+        expect(error.code).toMatch("NOT-FOUND");
+    });
+
+    test('download: not JSON file', async () => {
+        const manifest = await Manifest.download('https://raw.githubusercontent.com/microsoft/xpoc-framework/main/lib/README.md').catch((err) => err);
+        const error = manifest as FetchError;
+        expect(error).toBeInstanceOf(Error);
+        expect(error.code).toMatch("NOT-FOUND");
+    });
+
 });

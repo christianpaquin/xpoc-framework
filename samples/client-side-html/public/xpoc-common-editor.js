@@ -7,6 +7,13 @@ function getCurrentIsoTime() {
     return new Date().toISOString().slice(0, "YYYY-MM-DDTHH:MM:SS".length) + 'Z';
 }
 
+function isoToLocalTime(isoTime) {
+    if (!isoTime) {
+        return '';
+    }
+    return new Date(isoTime).toLocaleString();
+}
+
 let manifest = {
     name: "",
     baseurl: "",
@@ -39,12 +46,45 @@ function validateAndUpdateName(inputValue, inputElement) {
 function validateAndUpdateURL(inputValue, inputElement, contentType = 'info', index = 0) {
     clearError();
     inputValue = inputValue.trim();
-    validatedURL = inputValue;
-    if (validatedURL) {
-        // prepend 'https://' if missing
-        if (!/^https?:\/\//i.test(inputValue)) {
-            validatedURL = 'https://' + inputValue;
+    if (inputValue) {
+        // value fields we can extract from an account or content URL
+        let validatedURL = undefined;
+        let accountName = undefined;
+        let platformName = undefined;
+        let puidValue = undefined;
+
+        if (contentType === 'account') {
+            // check if it is a supported platform account URL
+            let platform = xpoc.Platforms.getPlatformFromAccountUrl(inputValue);
+            if (platform) {
+                data = platform.canonicalizeAccountUrl(inputValue);
+                validatedURL = data.url;
+                accountName = data.account;
+                platformName = platform.DisplayName;
+            }
         }
+        if (contentType === 'content') {
+            // check if it is a supported platform content URL
+            let platform = xpoc.Platforms.getPlatformFromContentUrl(inputValue);
+            if (platform) {
+                data = platform.canonicalizeContentUrl(inputValue);
+                validatedURL = data.url;
+                accountName = data.account;
+                puidValue = data.puid;
+                platformName = platform.DisplayName;
+            }
+        }
+        if (!validatedURL) {
+            // not a URL from a supported platform, so just validate it
+            validatedURL = inputValue; // initial value
+            // prepend 'https://' if missing
+            if (!/^https?:\/\//i.test(inputValue)) {
+                validatedURL = 'https://' + inputValue;
+            }
+        }
+        
+        // validate the URL (platform canonicalization will have already done this,
+        // but we do a final check here to catch any invalid URLs)
         // account and content URLs can have query params and anchor
         const nonDomainChars = "a-zA-Z0-9-_.!~*'();:@&=+$,";
         const fullUrl = contentType !== 'info';
@@ -66,16 +106,30 @@ function validateAndUpdateURL(inputValue, inputElement, contentType = 'info', in
             showError(`Please enter a valid base URL for the ${urlField}.`);
             return;
         }
+        // update the manifest values
+        let accountFieldIndex, platformFieldIndex, puidFieldIndex;
         if (contentType === 'info') {
             manifest.baseurl = validatedURL;
         } else if (contentType === 'content') {
             manifest.content[index].url = validatedURL;
+            if (accountName) { manifest.content[index].account = accountName; }
+            if (platformName) { manifest.content[index].platform = platformName; }
+            if (puidValue) { manifest.content[index].puid = puidValue; }
         } else if (contentType === 'account') {
             manifest.accounts[index].url = validatedURL;
+            if (accountName) { manifest.accounts[index].account = accountName; }
+            if (platformName) { manifest.accounts[index].platform = platformName; }
+        }
+        // update value in the input field and other fields in the same row (if applicable)
+        inputElement.value = validatedURL;
+        if (accountName || platformName || puidValue) {
+            let parentRow = inputElement.closest('tr');
+            //let inputs = parentRow.querySelectorAll('input[type="text"]');
+            if (accountName) { parentRow.querySelector('input[data-fieldname="account"]').value = accountName; }
+            if (platformName) { parentRow.querySelector('input[data-fieldname="platform"]').value = platformName; }
+            if (puidValue) { parentRow.querySelector('input[data-fieldname="puid"]').value = puidValue; }
         }
     }
-    // update value in the input field
-    inputElement.value = validatedURL;
 }
 
 function validateAndUpdateAccount(inputValue, inputElement, contentType = undefined, index = 0) {
@@ -99,10 +153,10 @@ function displayManifest() {
         // Update the update timestamp
         manifest.updated = getCurrentIsoTime();
         // Delete the accounts and content arrays if they are empty
-        if (manifest.accounts.length === 0) {
+        if (manifest.accounts && manifest.accounts.length === 0) {
             delete manifest.accounts;
         }
-        if (manifest.content.length === 0) {
+        if (manifest.content && manifest.content.length === 0) {
             delete manifest.content;
         }
         // Populate the textarea with the generated manifest and make it visible

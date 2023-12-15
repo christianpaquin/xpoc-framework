@@ -28,7 +28,14 @@
     <table id="contentTable"></table>
     </div>
 
+    <footer>
+        Last modified: <span id="lastModified">2023-12-14</span>
+        •
+        Commit ID: <span id="commitId">49d6b0d</span>
+    </footer>
+
     <script src="xpoc-common.js"></script>
+    <script src="xpoc.iife.min.js"></script>
     <script>
         function fetchManifest() {
             let url = document.getElementById('urlInput').value.trim();
@@ -40,8 +47,14 @@
             fetchXpocManifest(url)
                 .then(data => {if (data) { displayManifest(data) }} )
                 .catch(error => {
+                    if (error?.code === "CORS") {
+                        showError(`Probable Cross-Origin error from ${url}.`);
+                    } else if (error?.code === "NOT-FOUND") {
+                        showError(`Manifest not found at ${url}.`);
+                    } else {
+                        showError(`Error parsing the XPOC manifest from ${url}.`);
+                    }
                     console.log('manifest display error', error);
-                    showError(`Error parsing the XPOC manifest from ${url}.`);
                     document.getElementById('accountsTable').innerHTML = '';
                     document.getElementById('contentTable').innerHTML = '';
                 });
@@ -66,7 +79,7 @@
             </tr>
             <tr>
                 <td><label for="manifestUpdated">Last updated:</td>
-                <td>${data.updated}</td>
+                <td>${isoToLocalTime(data.updated)}</td>
             </tr>
             <tr>
                 <td><label for="manifestVersion">Version</td>
@@ -124,7 +137,7 @@
                         <td>${content.platform}</td>
                         <td>${content.puid}</td>
                         <td>${content.account}</td>
-                        <td>${content.timestamp}</td>
+                        <td>${isoToLocalTime(content.timestamp)}</td>
                     </tr>
                 `;
             });

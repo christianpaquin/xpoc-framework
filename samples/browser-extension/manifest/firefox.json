@@ -1,18 +1,18 @@
 {
     "manifest_version": 3,
-    "name": "Cross-Platform Origin Content Extension",
+    "name": "Cross-Platform Origin of Content Extension",
     "version": "0.3.0",
     "description": "Validates XPOC-protected content",
     "permissions": [
-        "activeTab",
+        "tabs",
         "contextMenus",
-        "offscreen"
+        "storage"
     ],
     "host_permissions": [
         "https://*/*"
     ],
     "background": {
-        "service_worker": "background.js",
+        "scripts" : ["background.js"],
         "type": "module"
     },
     "icons": {
@@ -20,6 +20,9 @@
     },
     "action": {
         "default_popup": "popup.html"
+    },
+    "options_ui": {
+        "page": "options.html"
     },
     "content_scripts": [
         {
@@ -37,7 +40,12 @@
                 "icons/xpoc_logo.svg",
                 "icons/checkmark.svg",
                 "icons/invalid.svg",
-                "icons/warning.svg"
+                "icons/unknown.svg",
+                "icons/warning.svg",
+                "icons/valid128x128.png",
+                "icons/invalid128x128.png",
+                "icons/warning128x128.png",
+                "icons/unknown128x128.png"
             ],
             "matches": [
                 "<all_urls>"
